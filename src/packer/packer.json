@@ -88,7 +88,7 @@
             "type": "shell"
         },
         {
-            "command": "New-VHD -Path '{{ user `dir_temp` }}/{{ build_name }}/Virtual Hard Disks/influxdb_data.vhdx' -SizeBytes 20GB -BlockSizeBytes 1MB",
+            "command": "New-VHD -Path '{{ user `dir_temp` }}/{{ build_name }}/Virtual Hard Disks/influxdb_data.vhdx' -SizeBytes 50GB -BlockSizeBytes 1MB",
             "execute_command": ["Powershell.exe", "-NonInteractive", "-NoLogo", "-NoProfile", "-Command", "{{.Command}}"],
             "type": "shell-local"
         },
