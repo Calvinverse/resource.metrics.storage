@@ -21,7 +21,6 @@ end
 # INSTALL INFLUXDB
 #
 
-# Don't include the managment console until they remove the visualiser
 include_recipe 'influxdb::default'
 
 #
@@ -415,7 +414,6 @@ end
 # CONSUL FILES
 #
 
-# This assumes the health user is called 'health' and the password is 'health'
 file '/etc/consul/conf.d/influxdb-backup.json' do
   action :create
   content <<~JSON
