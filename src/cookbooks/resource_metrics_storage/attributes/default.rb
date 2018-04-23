@@ -27,7 +27,7 @@ default['firewall']['ipv6_enabled'] = false
 # INFLUXDB
 #
 
-default['influxdb']['version'] = '1.5.0-1'
+default['influxdb']['version'] = '1.5.2-1'
 
 default['influxdb']['lib_file_path'] = '/srv/influxdb'
 default['influxdb']['meta_file_path'] = "#{node['influxdb']['lib_file_path']}/meta"
