@@ -90,13 +90,21 @@
             "type": "shell"
         },
         {
-            "command": "New-VHD -Path '{{ user `dir_temp` }}/{{ build_name }}/Virtual Hard Disks/influxdb_data.vhdx' -SizeBytes 50GB -BlockSizeBytes 1MB",
-            "execute_command": ["Powershell.exe", "-NonInteractive", "-NoLogo", "-NoProfile", "-Command", "{{.Command}}"],
+            "env_var_format": "$env:%s=\"%s\"; ",
+            "execute_command": ["powershell.exe", "{{.Vars}} {{.Script}}"],
+            "inline": [
+                "New-VHD -Path '{{ user `dir_temp` }}/{{ build_name }}/Virtual Hard Disks/influxdb_data.vhdx' -SizeBytes 50GB -BlockSizeBytes 1MB"
+            ],
+            "tempfile_extension": ".ps1",
             "type": "shell-local"
         },
         {
-            "command": "Add-VmHardDiskDrive -VMName {{ user `vm_name` }} -Path '{{ user `dir_temp` }}/{{build_name}}/Virtual Hard Disks/influxdb_data.vhdx'",
-            "execute_command": ["Powershell.exe", "-NonInteractive", "-NoLogo", "-NoProfile", "-Command", "{{.Command}}"],
+            "env_var_format": "$env:%s=\"%s\"; ",
+            "execute_command": ["powershell.exe", "{{.Vars}} {{.Script}}"],
+            "inline": [
+                "Add-VmHardDiskDrive -VMName {{ user `vm_name` }} -Path '{{ user `dir_temp` }}/{{build_name}}/Virtual Hard Disks/influxdb_data.vhdx'"
+            ],
+            "tempfile_extension": ".ps1",
             "type": "shell-local"
         },
         {
