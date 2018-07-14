@@ -411,7 +411,7 @@ describe 'resource_metrics_storage::influxdb' do
                 "timeout": "5s"
               }
             ],
-            "enableTagOverride": false,
+            "enable_tag_override": false,
             "id": "influxdb_backup",
             "name": "metrics",
             "port": 8088,
@@ -441,7 +441,7 @@ describe 'resource_metrics_storage::influxdb' do
                 "timeout": "5s"
               }
             ],
-            "enableTagOverride": false,
+            "enable_tag_override": false,
             "id": "influxdb_collectd",
             "name": "metrics",
             "port": 25826,
@@ -471,7 +471,7 @@ describe 'resource_metrics_storage::influxdb' do
                 "timeout": "5s"
               }
             ],
-            "enableTagOverride": false,
+            "enable_tag_override": false,
             "id": "influxdb_graphite",
             "name": "metrics",
             "port": 2003,
@@ -501,7 +501,7 @@ describe 'resource_metrics_storage::influxdb' do
                 "timeout": "5s"
               }
             ],
-            "enableTagOverride": false,
+            "enable_tag_override": false,
             "id": "influxdb_http",
             "name": "metrics",
             "port": 8086,
@@ -531,7 +531,7 @@ describe 'resource_metrics_storage::influxdb' do
                 "timeout": "5s"
               }
             ],
-            "enableTagOverride": false,
+            "enable_tag_override": false,
             "id": "influxdb_opentsdb",
             "name": "metrics",
             "port": 4242,

@@ -430,7 +430,7 @@ file '/etc/consul/conf.d/influxdb-backup.json' do
               "timeout": "5s"
             }
           ],
-          "enableTagOverride": false,
+          "enable_tag_override": false,
           "id": "influxdb_backup",
           "name": "metrics",
           "port": #{influxdb_backup_port},
@@ -459,7 +459,7 @@ file '/etc/consul/conf.d/influxdb-collectd.json' do
               "timeout": "5s"
             }
           ],
-          "enableTagOverride": false,
+          "enable_tag_override": false,
           "id": "influxdb_collectd",
           "name": "metrics",
           "port": #{influxdb_collectd_port},
@@ -488,7 +488,7 @@ file '/etc/consul/conf.d/influxdb-graphite.json' do
               "timeout": "5s"
             }
           ],
-          "enableTagOverride": false,
+          "enable_tag_override": false,
           "id": "influxdb_graphite",
           "name": "metrics",
           "port": #{influxdb_graphite_port},
@@ -517,7 +517,7 @@ file '/etc/consul/conf.d/influxdb-http.json' do
               "timeout": "5s"
             }
           ],
-          "enableTagOverride": false,
+          "enable_tag_override": false,
           "id": "influxdb_http",
           "name": "metrics",
           "port": #{influxdb_http_port},
@@ -546,7 +546,7 @@ file '/etc/consul/conf.d/influxdb-opentsdb.json' do
               "timeout": "5s"
             }
           ],
-          "enableTagOverride": false,
+          "enable_tag_override": false,
           "id": "influxdb_opentsdb",
           "name": "metrics",
           "port": #{influxdb_opentsdb_port},
