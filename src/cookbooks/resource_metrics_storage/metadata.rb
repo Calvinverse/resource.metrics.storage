@@ -13,7 +13,6 @@ version '${VersionSemantic}'
 
 supports 'ubuntu', '>= 16.04'
 
-depends 'erlang', '= 5.1.0'
 depends 'firewall', '= 2.6.2'
 depends 'influxdb', '= 6.2.0'
 depends 'systemd', '= 3.2.3'
