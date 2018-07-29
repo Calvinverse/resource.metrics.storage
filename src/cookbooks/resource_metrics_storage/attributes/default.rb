@@ -163,4 +163,6 @@ default['influxdb']['telegraf']['consul_template_inputs_file'] = 'telegraf_influ
 # TELEGRAF
 #
 
+default['telegraf']['service_user'] = 'telegraf'
+default['telegraf']['service_group'] = 'telegraf'
 default['telegraf']['config_directory'] = '/etc/telegraf/telegraf.d'

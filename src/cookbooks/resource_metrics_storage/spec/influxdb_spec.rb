@@ -17,7 +17,7 @@ describe 'resource_metrics_storage::influxdb' do
     it 'creates and mounts the data file system at /srv/influxdb/data' do
       expect(chef_run).to create_directory('/srv/influxdb/data').with(
         group: 'influxdb',
-        mode: '775',
+        mode: '750',
         owner: 'influxdb'
       )
     end
@@ -25,7 +25,7 @@ describe 'resource_metrics_storage::influxdb' do
     it 'creates and mounts the meta file system at /srv/influxdb/meta' do
       expect(chef_run).to create_directory('/srv/influxdb/meta').with(
         group: 'influxdb',
-        mode: '775',
+        mode: '750',
         owner: 'influxdb'
       )
     end
@@ -33,7 +33,7 @@ describe 'resource_metrics_storage::influxdb' do
     it 'creates and mounts the WAL file system at /srv/influxdb/wal' do
       expect(chef_run).to create_directory('/srv/influxdb/wal').with(
         group: 'influxdb',
-        mode: '775',
+        mode: '750',
         owner: 'influxdb'
       )
     end
@@ -41,7 +41,7 @@ describe 'resource_metrics_storage::influxdb' do
     it 'creates and mounts the collectd file system at /srv/influxdb/collectd' do
       expect(chef_run).to create_directory('/srv/influxdb/collectd').with(
         group: 'influxdb',
-        mode: '775',
+        mode: '750',
         owner: 'influxdb'
       )
     end
@@ -339,6 +339,11 @@ describe 'resource_metrics_storage::influxdb' do
     it 'creates the /srv/influxdb/collectd/types.db' do
       expect(chef_run).to create_file('/srv/influxdb/collectd/types.db')
         .with_content(collectd_types_db_content)
+        .with(
+          group: 'influxdb',
+          mode: '750',
+          owner: 'influxdb'
+        )
     end
   end
 
@@ -585,6 +590,11 @@ describe 'resource_metrics_storage::influxdb' do
     it 'creates telegraf influxdb input template file in the consul-template template directory' do
       expect(chef_run).to create_file('/etc/consul-template.d/templates/telegraf_influxdb_inputs.ctmpl')
         .with_content(telegraf_influxdb_inputs_template_content)
+        .with(
+          group: 'root',
+          owner: 'root',
+          mode: '0550'
+        )
     end
 
     consul_template_telegraf_influxdb_inputs_content = <<~CONF
@@ -610,7 +620,7 @@ describe 'resource_metrics_storage::influxdb' do
         # command will only run if the resulting template changes. The command must
         # return within 30s (configurable), and it must have a successful exit code.
         # Consul Template is not a replacement for a process monitor or init system.
-        command = "systemctl reload telegraf"
+        command = "chown telegraf:telegraf /etc/telegraf/telegraf.d/inputs_influxdb.conf && systemctl reload telegraf"
 
         # This is the maximum amount of time to wait for the optional command to
         # return. Default is 30s.
@@ -626,7 +636,7 @@ describe 'resource_metrics_storage::influxdb' do
         # unspecified, Consul Template will attempt to match the permissions of the
         # file that already exists at the destination path. If no file exists at that
         # path, the permissions are 0644.
-        perms = 0755
+        perms = 0550
 
         # This option backs up the previously rendered template at the destination
         # path before writing a new one. It keeps exactly one backup. This option is
@@ -655,6 +665,11 @@ describe 'resource_metrics_storage::influxdb' do
     it 'creates telegraf_influxdb_inputs.hcl in the consul-template template directory' do
       expect(chef_run).to create_file('/etc/consul-template.d/conf/telegraf_influxdb_inputs.hcl')
         .with_content(consul_template_telegraf_influxdb_inputs_content)
+        .with(
+          group: 'root',
+          owner: 'root',
+          mode: '0550'
+        )
     end
   end
 end
