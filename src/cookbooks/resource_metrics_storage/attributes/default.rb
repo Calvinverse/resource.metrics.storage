@@ -27,7 +27,7 @@ default['firewall']['ipv6_enabled'] = false
 # INFLUXDB
 #
 
-default['influxdb']['version'] = '1.5.2-1'
+default['influxdb']['version'] = '1.6.3-1'
 
 default['influxdb']['lib_file_path'] = '/srv/influxdb'
 default['influxdb']['meta_file_path'] = "#{node['influxdb']['lib_file_path']}/meta"
@@ -163,4 +163,6 @@ default['influxdb']['telegraf']['consul_template_inputs_file'] = 'telegraf_influ
 # TELEGRAF
 #
 
+default['telegraf']['service_user'] = 'telegraf'
+default['telegraf']['service_group'] = 'telegraf'
 default['telegraf']['config_directory'] = '/etc/telegraf/telegraf.d'

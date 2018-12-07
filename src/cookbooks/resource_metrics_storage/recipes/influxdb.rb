@@ -31,7 +31,7 @@ influxdb_meta_path = node['influxdb']['meta_file_path']
 directory influxdb_meta_path do
   action :create
   group node['influxdb']['service_group']
-  mode '775'
+  mode '750'
   owner node['influxdb']['service_user']
   recursive true
 end
@@ -40,7 +40,7 @@ influxdb_data_path = node['influxdb']['data_file_path']
 directory influxdb_data_path do
   action :create
   group node['influxdb']['service_group']
-  mode '775'
+  mode '750'
   owner node['influxdb']['service_user']
   recursive true
 end
@@ -49,7 +49,7 @@ influxdb_wal_path = node['influxdb']['wal_file_path']
 directory influxdb_wal_path do
   action :create
   group node['influxdb']['service_group']
-  mode '775'
+  mode '750'
   owner node['influxdb']['service_user']
   recursive true
 end
@@ -58,7 +58,7 @@ influx_collectd_path = node['influxdb']['collectd_path']
 directory influx_collectd_path do
   action :create
   group node['influxdb']['service_group']
-  mode '775'
+  mode '750'
   owner node['influxdb']['service_user']
   recursive true
 end
@@ -356,6 +356,9 @@ file influx_collectd_types_path do
     mysql_qcache            hits:COUNTER:0:U, inserts:COUNTER:0:U, not_cached:COUNTER:0:U, lowmem_prunes:COUNTER:0:U, queries_in_cache:GAUGE:0:U
     mysql_threads           running:GAUGE:0:U, connected:GAUGE:0:U, cached:GAUGE:0:U, created:COUNTER:0:U
   DB
+  group node['influxdb']['service_group']
+  mode '750'
+  owner node['influxdb']['service_user']
 end
 
 #
@@ -430,7 +433,7 @@ file '/etc/consul/conf.d/influxdb-backup.json' do
               "timeout": "5s"
             }
           ],
-          "enableTagOverride": false,
+          "enable_tag_override": false,
           "id": "influxdb_backup",
           "name": "metrics",
           "port": #{influxdb_backup_port},
@@ -459,7 +462,7 @@ file '/etc/consul/conf.d/influxdb-collectd.json' do
               "timeout": "5s"
             }
           ],
-          "enableTagOverride": false,
+          "enable_tag_override": false,
           "id": "influxdb_collectd",
           "name": "metrics",
           "port": #{influxdb_collectd_port},
@@ -488,7 +491,7 @@ file '/etc/consul/conf.d/influxdb-graphite.json' do
               "timeout": "5s"
             }
           ],
-          "enableTagOverride": false,
+          "enable_tag_override": false,
           "id": "influxdb_graphite",
           "name": "metrics",
           "port": #{influxdb_graphite_port},
@@ -517,7 +520,7 @@ file '/etc/consul/conf.d/influxdb-http.json' do
               "timeout": "5s"
             }
           ],
-          "enableTagOverride": false,
+          "enable_tag_override": false,
           "id": "influxdb_http",
           "name": "metrics",
           "port": #{influxdb_http_port},
@@ -546,7 +549,7 @@ file '/etc/consul/conf.d/influxdb-opentsdb.json' do
               "timeout": "5s"
             }
           ],
-          "enableTagOverride": false,
+          "enable_tag_override": false,
           "id": "influxdb_opentsdb",
           "name": "metrics",
           "port": #{influxdb_opentsdb_port},
@@ -602,7 +605,9 @@ file "#{consul_template_template_path}/#{telegraf_influxdb_inputs_template_file}
       [inputs.influxdb.tags]
         influxdb_database = "{{ keyOrDefault "config/services/metrics/databases/services" "services" }}"
   CONF
-  mode '755'
+  group 'root'
+  mode '0550'
+  owner 'root'
 end
 
 file "#{consul_template_config_path}/telegraf_influxdb_inputs.hcl" do
@@ -630,7 +635,7 @@ file "#{consul_template_config_path}/telegraf_influxdb_inputs.hcl" do
       # command will only run if the resulting template changes. The command must
       # return within 30s (configurable), and it must have a successful exit code.
       # Consul Template is not a replacement for a process monitor or init system.
-      command = "systemctl reload #{telegraf_service}"
+      command = "/bin/bash -c 'chown #{node['telegraf']['service_user']}:#{node['telegraf']['service_group']} #{telegraf_config_directory}/inputs_influxdb.conf && systemctl restart #{telegraf_service}'"
 
       # This is the maximum amount of time to wait for the optional command to
       # return. Default is 30s.
@@ -646,7 +651,7 @@ file "#{consul_template_config_path}/telegraf_influxdb_inputs.hcl" do
       # unspecified, Consul Template will attempt to match the permissions of the
       # file that already exists at the destination path. If no file exists at that
       # path, the permissions are 0644.
-      perms = 0755
+      perms = 0550
 
       # This option backs up the previously rendered template at the destination
       # path before writing a new one. It keeps exactly one backup. This option is
@@ -672,5 +677,7 @@ file "#{consul_template_config_path}/telegraf_influxdb_inputs.hcl" do
       }
     }
   HCL
-  mode '755'
+  group 'root'
+  mode '0550'
+  owner 'root'
 end
