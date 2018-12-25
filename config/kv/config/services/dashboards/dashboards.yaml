@@ -1,5 +1,0 @@
-config:
-  # Define the dashboard for influx
-  - key: config/services/dashboards/metrics/provisioning/dashboards/services/service-influxdb
-    file: dashboards/services/service-influxdb.json
-
