@@ -347,6 +347,40 @@ describe 'resource_metrics_storage::influxdb' do
     end
   end
 
+  context 'creates the databases and sets retention policies' do
+    let(:chef_run) { ChefSpec::SoloRunner.converge(described_recipe) }
+
+    it 'creates the system database' do
+      expect(chef_run).to create_influxdb_database('system')
+    end
+
+    it 'creates the system database retention policy' do
+      expect(chef_run).to create_influxdb_retention_policy('retention.system').with(
+        policy_name: 'retention.system',
+        database: 'system',
+        duration: '2w',
+        replication: 1
+      )
+    end
+
+    it 'creates the services database' do
+      expect(chef_run).to create_influxdb_database('services')
+    end
+
+    it 'creates the services database retention policy' do
+      expect(chef_run).to create_influxdb_retention_policy('retention.services').with(
+        policy_name: 'retention.services',
+        database: 'services',
+        duration: '26w',
+        replication: 1
+      )
+    end
+  end
+
+  context 'creates the services database' do
+    let(:chef_run) { ChefSpec::SoloRunner.converge(described_recipe) }
+  end
+
   context 'configures the firewall for InfluxDB' do
     let(:chef_run) { ChefSpec::SoloRunner.converge(described_recipe) }
 
