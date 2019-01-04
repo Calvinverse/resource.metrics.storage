@@ -370,7 +370,7 @@ describe 'resource_metrics_storage::influxdb' do
     it 'creates the services database retention policy' do
       expect(chef_run).to create_influxdb_retention_policy('retention.services').with(
         policy_name: 'retention.services',
-        database: 'system',
+        database: 'services',
         duration: '26w',
         replication: 1
       )
