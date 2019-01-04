@@ -362,6 +362,34 @@ file influx_collectd_types_path do
 end
 
 #
+# CREATE THE DATABASES
+#
+
+influxdb_database 'system' do
+  action :create
+end
+
+influxdb_retention_policy "retention.system" do
+  policy_name 'retention.system'
+  database 'system'
+  duration '2w'
+  replication 1
+  action :create
+end
+
+influxdb_database 'services' do
+  action :create
+end
+
+influxdb_retention_policy "retention.services" do
+  policy_name 'retention.services'
+  database 'services'
+  duration '26w'
+  replication 1
+  action :create
+end
+
+#
 # ALLOW INFLUXDB THROUGH THE FIREWALL
 #
 
