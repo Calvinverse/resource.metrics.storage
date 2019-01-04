@@ -369,7 +369,7 @@ influxdb_database 'system' do
   action :create
 end
 
-influxdb_retention_policy "retention.system" do
+influxdb_retention_policy 'retention.system' do
   policy_name 'retention.system'
   database 'system'
   duration '2w'
@@ -381,7 +381,7 @@ influxdb_database 'services' do
   action :create
 end
 
-influxdb_retention_policy "retention.services" do
+influxdb_retention_policy 'retention.services' do
   policy_name 'retention.services'
   database 'services'
   duration '26w'
