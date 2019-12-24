@@ -372,6 +372,7 @@ end
 influxdb_retention_policy 'retention.system' do
   policy_name 'retention.system'
   database 'system'
+  default true
   duration '2w'
   replication 1
   action :create
@@ -384,6 +385,7 @@ end
 influxdb_retention_policy 'retention.services' do
   policy_name 'retention.services'
   database 'services'
+  default true
   duration '26w'
   replication 1
   action :create
