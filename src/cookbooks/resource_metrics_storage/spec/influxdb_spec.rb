@@ -423,14 +423,6 @@ describe 'resource_metrics_storage::influxdb' do
         direction: :in
       )
     end
-
-    it 'opens the InfluxDB OpenTSDB port' do
-      expect(chef_run).to create_firewall_rule('influxdb-opentsdb').with(
-        command: :allow,
-        dest_port: 4242,
-        direction: :in
-      )
-    end
   end
 
   context 'registers the service with consul' do
@@ -554,36 +546,6 @@ describe 'resource_metrics_storage::influxdb' do
     it 'creates the /etc/consul/conf.d/influxdb-http.json' do
       expect(chef_run).to create_file('/etc/consul/conf.d/influxdb-http.json')
         .with_content(consul_influx_http_config_content)
-    end
-
-    consul_influx_opentsdb_config_content = <<~JSON
-      {
-        "services": [
-          {
-            "checks": [
-              {
-                "http": "http://localhost:8086/ping",
-                "id": "influxdb_opentsdb_health_check",
-                "interval": "30s",
-                "method": "GET",
-                "name": "Influx OpenTSDB health check",
-                "timeout": "5s"
-              }
-            ],
-            "enable_tag_override": false,
-            "id": "influxdb_opentsdb",
-            "name": "metrics",
-            "port": 4242,
-            "tags": [
-              "opentsdb"
-            ]
-          }
-        ]
-      }
-    JSON
-    it 'creates the /etc/consul/conf.d/influxdb-opentsdb.json' do
-      expect(chef_run).to create_file('/etc/consul/conf.d/influxdb-opentsdb.json')
-        .with_content(consul_influx_opentsdb_config_content)
     end
   end
 

@@ -44,7 +44,6 @@ default['influxdb']['port']['backup'] = 8088
 default['influxdb']['port']['collectd'] = 25_826
 default['influxdb']['port']['graphite'] = 2003
 default['influxdb']['port']['http'] = 8086
-default['influxdb']['port']['opentsdb'] = 4242
 
 # For influxdb versions >= 1.0.x
 # ref: https://docs.influxdata.com/influxdb/v1.0/administration/config/
@@ -136,13 +135,6 @@ default['influxdb']['config'] = {
       'bind-address' => ":#{node['influxdb']['port']['collectd']}",
       'database' => 'collectd',
       'typesdb' => node['influxdb']['collectd_types_path']
-    }
-  ],
-  'opentsdb' => [
-    {
-      'enabled' => true,
-      'bind-address' => ":#{node['influxdb']['port']['opentsdb']}",
-      'database' => 'opentsdb'
     }
   ],
   'udp' => [

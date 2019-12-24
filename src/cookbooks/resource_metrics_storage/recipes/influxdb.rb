@@ -435,14 +435,6 @@ firewall_rule 'influxdb-http' do
   direction :in
 end
 
-influxdb_opentsdb_port = node['influxdb']['port']['opentsdb']
-firewall_rule 'influxdb-opentsdb' do
-  command :allow
-  description 'Allow InfluxDB OpenTSDB traffic'
-  dest_port influxdb_opentsdb_port
-  direction :in
-end
-
 #
 # CONSUL FILES
 #
@@ -556,35 +548,6 @@ file '/etc/consul/conf.d/influxdb-http.json' do
           "port": #{influxdb_http_port},
           "tags": [
             "http"
-          ]
-        }
-      ]
-    }
-  JSON
-end
-
-file '/etc/consul/conf.d/influxdb-opentsdb.json' do
-  action :create
-  content <<~JSON
-    {
-      "services": [
-        {
-          "checks": [
-            {
-              "http": "http://localhost:#{influxdb_http_port}/ping",
-              "id": "influxdb_opentsdb_health_check",
-              "interval": "30s",
-              "method": "GET",
-              "name": "Influx OpenTSDB health check",
-              "timeout": "5s"
-            }
-          ],
-          "enable_tag_override": false,
-          "id": "influxdb_opentsdb",
-          "name": "metrics",
-          "port": #{influxdb_opentsdb_port},
-          "tags": [
-            "opentsdb"
           ]
         }
       ]
