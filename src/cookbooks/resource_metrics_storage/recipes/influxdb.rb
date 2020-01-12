@@ -8,6 +8,55 @@
 #
 
 #
+# ALLOW INFLUXDB THROUGH THE FIREWALL
+#
+
+influxdb_admin_port = node['influxdb']['port']['admin']
+firewall_rule 'influxdb-admin' do
+  command :allow
+  description 'Allow InfluxDB admin traffic'
+  dest_port influxdb_admin_port
+  direction :in
+end
+
+influxdb_backup_port = node['influxdb']['port']['backup']
+firewall_rule 'influxdb-backup' do
+  command :allow
+  description 'Allow InfluxDB backup traffic'
+  dest_port influxdb_backup_port
+  direction :in
+end
+
+influxdb_collectd_port = node['influxdb']['port']['collectd']
+firewall_rule 'influxdb-collectd' do
+  command :allow
+  description 'Allow InfluxDB CollectD traffic'
+  dest_port influxdb_collectd_port
+  direction :in
+end
+
+influxdb_graphite_port = node['influxdb']['port']['graphite']
+firewall_rule 'influxdb-graphite' do
+  command :allow
+  description 'Allow InfluxDB Graphite traffic'
+  dest_port influxdb_graphite_port
+  direction :in
+end
+
+influxdb_http_port = node['influxdb']['port']['http']
+firewall_rule 'influxdb-http' do
+  command :allow
+  description 'Allow InfluxDB HTTP traffic'
+  dest_port influxdb_http_port
+  direction :in
+end
+
+# Force the firewall settings so that we can actually communicate with influx
+firewall 'default' do
+  action :restart
+end
+
+#
 # CREATE DATA PATH
 #
 
@@ -392,48 +441,9 @@ influxdb_retention_policy 'retention.services' do
 end
 
 #
-# ALLOW INFLUXDB THROUGH THE FIREWALL
 # CREATE THE USERS
 #
 
-influxdb_admin_port = node['influxdb']['port']['admin']
-firewall_rule 'influxdb-admin' do
-  command :allow
-  description 'Allow InfluxDB admin traffic'
-  dest_port influxdb_admin_port
-  direction :in
-end
-
-influxdb_backup_port = node['influxdb']['port']['backup']
-firewall_rule 'influxdb-backup' do
-  command :allow
-  description 'Allow InfluxDB backup traffic'
-  dest_port influxdb_backup_port
-  direction :in
-end
-
-influxdb_collectd_port = node['influxdb']['port']['collectd']
-firewall_rule 'influxdb-collectd' do
-  command :allow
-  description 'Allow InfluxDB CollectD traffic'
-  dest_port influxdb_collectd_port
-  direction :in
-end
-
-influxdb_graphite_port = node['influxdb']['port']['graphite']
-firewall_rule 'influxdb-graphite' do
-  command :allow
-  description 'Allow InfluxDB Graphite traffic'
-  dest_port influxdb_graphite_port
-  direction :in
-end
-
-influxdb_http_port = node['influxdb']['port']['http']
-firewall_rule 'influxdb-http' do
-  command :allow
-  description 'Allow InfluxDB HTTP traffic'
-  dest_port influxdb_http_port
-  direction :in
 influxdb_user node['influxdb']['users']['interal_metrics']['username'] do
   action :create
   databases ['_internal']
