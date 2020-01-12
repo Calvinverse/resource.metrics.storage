@@ -393,6 +393,7 @@ end
 
 #
 # ALLOW INFLUXDB THROUGH THE FIREWALL
+# CREATE THE USERS
 #
 
 influxdb_admin_port = node['influxdb']['port']['admin']
@@ -433,6 +434,11 @@ firewall_rule 'influxdb-http' do
   description 'Allow InfluxDB HTTP traffic'
   dest_port influxdb_http_port
   direction :in
+influxdb_user node['influxdb']['users']['interal_metrics']['username'] do
+  action :create
+  databases ['_internal']
+  password node['influxdb']['users']['interal_metrics']['password']
+  permissions ['READ']
 end
 
 #
@@ -585,6 +591,10 @@ file "#{consul_template_template_path}/#{telegraf_influxdb_inputs_template_file}
       urls = [
         "http://localhost:#{influxdb_http_port}/debug/vars"
       ]
+
+      ## Username and password to send using HTTP Basic Authentication.
+      username = "#{node['influxdb']['users']['interal_metrics']['username']}"
+      password = "#{node['influxdb']['users']['interal_metrics']['password']}"
 
       ## Optional SSL Config
       # ssl_ca = "/etc/telegraf/ca.pem"

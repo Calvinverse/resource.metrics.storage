@@ -45,6 +45,9 @@ default['influxdb']['port']['collectd'] = 25_826
 default['influxdb']['port']['graphite'] = 2003
 default['influxdb']['port']['http'] = 8086
 
+default['influxdb']['users']['interal_metrics']['username'] = 'user.internal.read'
+default['influxdb']['users']['interal_metrics']['password'] = SecureRandom.uuid
+
 # For influxdb versions >= 1.0.x
 # ref: https://docs.influxdata.com/influxdb/v1.0/administration/config/
 default['influxdb']['config'] = {
@@ -100,7 +103,7 @@ default['influxdb']['config'] = {
   'http' => {
     'enabled' => true,
     'bind-address' => ":#{node['influxdb']['port']['http']}",
-    'auth-enabled' => false,
+    'auth-enabled' => true,
     'log-enabled' => true,
     'write-tracing' => false,
     'pprof-enabled' => false,
