@@ -377,8 +377,18 @@ describe 'resource_metrics_storage::influxdb' do
     end
   end
 
-  context 'creates the services database' do
+  context 'creates the users' do
     let(:chef_run) { ChefSpec::SoloRunner.converge(described_recipe) }
+    let(:node) { chef_run.node }
+
+    it 'creates the internal database read user' do
+      user_internal_read_username = node['influxdb']['users']['interal_metrics']['username']
+      user_internal_read_password = node['influxdb']['users']['interal_metrics']['password']
+      expect(chef_run).to create_influxdb_user(user_internal_read_username).with(
+        databases: '_internal',
+        permissions: 'READ'
+      )
+    end
   end
 
   context 'configures the firewall for InfluxDB' do
@@ -420,14 +430,6 @@ describe 'resource_metrics_storage::influxdb' do
       expect(chef_run).to create_firewall_rule('influxdb-http').with(
         command: :allow,
         dest_port: 8086,
-        direction: :in
-      )
-    end
-
-    it 'opens the InfluxDB OpenTSDB port' do
-      expect(chef_run).to create_firewall_rule('influxdb-opentsdb').with(
-        command: :allow,
-        dest_port: 4242,
         direction: :in
       )
     end
@@ -555,73 +557,49 @@ describe 'resource_metrics_storage::influxdb' do
       expect(chef_run).to create_file('/etc/consul/conf.d/influxdb-http.json')
         .with_content(consul_influx_http_config_content)
     end
-
-    consul_influx_opentsdb_config_content = <<~JSON
-      {
-        "services": [
-          {
-            "checks": [
-              {
-                "http": "http://localhost:8086/ping",
-                "id": "influxdb_opentsdb_health_check",
-                "interval": "30s",
-                "method": "GET",
-                "name": "Influx OpenTSDB health check",
-                "timeout": "5s"
-              }
-            ],
-            "enable_tag_override": false,
-            "id": "influxdb_opentsdb",
-            "name": "metrics",
-            "port": 4242,
-            "tags": [
-              "opentsdb"
-            ]
-          }
-        ]
-      }
-    JSON
-    it 'creates the /etc/consul/conf.d/influxdb-opentsdb.json' do
-      expect(chef_run).to create_file('/etc/consul/conf.d/influxdb-opentsdb.json')
-        .with_content(consul_influx_opentsdb_config_content)
-    end
   end
 
   context 'adds the consul-template files for telegraf monitoring of influxdb' do
     let(:chef_run) { ChefSpec::SoloRunner.converge(described_recipe) }
+    let(:node) { chef_run.node }
 
-    telegraf_influxdb_inputs_template_content = <<~CONF
-      # Telegraf Configuration
-
-      ###############################################################################
-      #                            INPUT PLUGINS                                    #
-      ###############################################################################
-
-      # Read InfluxDB-formatted JSON metrics from one or more HTTP endpoints
-      [[inputs.influxdb]]
-        ## Works with InfluxDB debug endpoints out of the box,
-        ## but other services can use this format too.
-        ## See the influxdb plugin's README for more details.
-
-        ## Multiple URLs from which to read InfluxDB-formatted JSON
-        ## Default is "http://localhost:8086/debug/vars".
-        urls = [
-          "http://localhost:8086/debug/vars"
-        ]
-
-        ## Optional SSL Config
-        # ssl_ca = "/etc/telegraf/ca.pem"
-        # ssl_cert = "/etc/telegraf/cert.pem"
-        # ssl_key = "/etc/telegraf/key.pem"
-        ## Use SSL but skip chain & host verification
-        # insecure_skip_verify = false
-
-        ## http request & header timeout
-        timeout = "5s"
-        [inputs.influxdb.tags]
-          influxdb_database = "{{ keyOrDefault "config/services/metrics/databases/services" "services" }}"
-    CONF
     it 'creates telegraf influxdb input template file in the consul-template template directory' do
+      telegraf_influxdb_inputs_template_content = <<~CONF
+        # Telegraf Configuration
+
+        ###############################################################################
+        #                            INPUT PLUGINS                                    #
+        ###############################################################################
+
+        # Read InfluxDB-formatted JSON metrics from one or more HTTP endpoints
+        [[inputs.influxdb]]
+          ## Works with InfluxDB debug endpoints out of the box,
+          ## but other services can use this format too.
+          ## See the influxdb plugin's README for more details.
+
+          ## Multiple URLs from which to read InfluxDB-formatted JSON
+          ## Default is "http://localhost:8086/debug/vars".
+          urls = [
+            "http://localhost:8086/debug/vars"
+          ]
+
+          ## Username and password to send using HTTP Basic Authentication.
+          username = "#{node['influxdb']['users']['interal_metrics']['username']}"
+          password = "#{node['influxdb']['users']['interal_metrics']['password']}"
+
+          ## Optional SSL Config
+          # ssl_ca = "/etc/telegraf/ca.pem"
+          # ssl_cert = "/etc/telegraf/cert.pem"
+          # ssl_key = "/etc/telegraf/key.pem"
+          ## Use SSL but skip chain & host verification
+          # insecure_skip_verify = false
+
+          ## http request & header timeout
+          timeout = "5s"
+          [inputs.influxdb.tags]
+            influxdb_database = "{{ keyOrDefault "config/services/metrics/databases/services" "services" }}"
+      CONF
+
       expect(chef_run).to create_file('/etc/consul-template.d/templates/telegraf_influxdb_inputs.ctmpl')
         .with_content(telegraf_influxdb_inputs_template_content)
         .with(

@@ -8,6 +8,55 @@
 #
 
 #
+# ALLOW INFLUXDB THROUGH THE FIREWALL
+#
+
+influxdb_admin_port = node['influxdb']['port']['admin']
+firewall_rule 'influxdb-admin' do
+  command :allow
+  description 'Allow InfluxDB admin traffic'
+  dest_port influxdb_admin_port
+  direction :in
+end
+
+influxdb_backup_port = node['influxdb']['port']['backup']
+firewall_rule 'influxdb-backup' do
+  command :allow
+  description 'Allow InfluxDB backup traffic'
+  dest_port influxdb_backup_port
+  direction :in
+end
+
+influxdb_collectd_port = node['influxdb']['port']['collectd']
+firewall_rule 'influxdb-collectd' do
+  command :allow
+  description 'Allow InfluxDB CollectD traffic'
+  dest_port influxdb_collectd_port
+  direction :in
+end
+
+influxdb_graphite_port = node['influxdb']['port']['graphite']
+firewall_rule 'influxdb-graphite' do
+  command :allow
+  description 'Allow InfluxDB Graphite traffic'
+  dest_port influxdb_graphite_port
+  direction :in
+end
+
+influxdb_http_port = node['influxdb']['port']['http']
+firewall_rule 'influxdb-http' do
+  command :allow
+  description 'Allow InfluxDB HTTP traffic'
+  dest_port influxdb_http_port
+  direction :in
+end
+
+# Force the firewall settings so that we can actually communicate with influx
+firewall 'default' do
+  action :restart
+end
+
+#
 # CREATE DATA PATH
 #
 
@@ -372,6 +421,7 @@ end
 influxdb_retention_policy 'retention.system' do
   policy_name 'retention.system'
   database 'system'
+  default true
   duration '2w'
   replication 1
   action :create
@@ -384,61 +434,21 @@ end
 influxdb_retention_policy 'retention.services' do
   policy_name 'retention.services'
   database 'services'
+  default true
   duration '26w'
   replication 1
   action :create
 end
 
 #
-# ALLOW INFLUXDB THROUGH THE FIREWALL
+# CREATE THE USERS
 #
 
-influxdb_admin_port = node['influxdb']['port']['admin']
-firewall_rule 'influxdb-admin' do
-  command :allow
-  description 'Allow InfluxDB admin traffic'
-  dest_port influxdb_admin_port
-  direction :in
-end
-
-influxdb_backup_port = node['influxdb']['port']['backup']
-firewall_rule 'influxdb-backup' do
-  command :allow
-  description 'Allow InfluxDB backup traffic'
-  dest_port influxdb_backup_port
-  direction :in
-end
-
-influxdb_collectd_port = node['influxdb']['port']['collectd']
-firewall_rule 'influxdb-collectd' do
-  command :allow
-  description 'Allow InfluxDB CollectD traffic'
-  dest_port influxdb_collectd_port
-  direction :in
-end
-
-influxdb_graphite_port = node['influxdb']['port']['graphite']
-firewall_rule 'influxdb-graphite' do
-  command :allow
-  description 'Allow InfluxDB Graphite traffic'
-  dest_port influxdb_graphite_port
-  direction :in
-end
-
-influxdb_http_port = node['influxdb']['port']['http']
-firewall_rule 'influxdb-http' do
-  command :allow
-  description 'Allow InfluxDB HTTP traffic'
-  dest_port influxdb_http_port
-  direction :in
-end
-
-influxdb_opentsdb_port = node['influxdb']['port']['opentsdb']
-firewall_rule 'influxdb-opentsdb' do
-  command :allow
-  description 'Allow InfluxDB OpenTSDB traffic'
-  dest_port influxdb_opentsdb_port
-  direction :in
+influxdb_user node['influxdb']['users']['interal_metrics']['username'] do
+  action :create
+  databases ['_internal']
+  password node['influxdb']['users']['interal_metrics']['password']
+  permissions ['READ']
 end
 
 #
@@ -561,35 +571,6 @@ file '/etc/consul/conf.d/influxdb-http.json' do
   JSON
 end
 
-file '/etc/consul/conf.d/influxdb-opentsdb.json' do
-  action :create
-  content <<~JSON
-    {
-      "services": [
-        {
-          "checks": [
-            {
-              "http": "http://localhost:#{influxdb_http_port}/ping",
-              "id": "influxdb_opentsdb_health_check",
-              "interval": "30s",
-              "method": "GET",
-              "name": "Influx OpenTSDB health check",
-              "timeout": "5s"
-            }
-          ],
-          "enable_tag_override": false,
-          "id": "influxdb_opentsdb",
-          "name": "metrics",
-          "port": #{influxdb_opentsdb_port},
-          "tags": [
-            "opentsdb"
-          ]
-        }
-      ]
-    }
-  JSON
-end
-
 #
 # CONSUL-TEMPLATE FILES
 #
@@ -620,6 +601,10 @@ file "#{consul_template_template_path}/#{telegraf_influxdb_inputs_template_file}
       urls = [
         "http://localhost:#{influxdb_http_port}/debug/vars"
       ]
+
+      ## Username and password to send using HTTP Basic Authentication.
+      username = "#{node['influxdb']['users']['interal_metrics']['username']}"
+      password = "#{node['influxdb']['users']['interal_metrics']['password']}"
 
       ## Optional SSL Config
       # ssl_ca = "/etc/telegraf/ca.pem"
