@@ -385,8 +385,9 @@ describe 'resource_metrics_storage::influxdb' do
       user_internal_read_username = node['influxdb']['users']['interal_metrics']['username']
       user_internal_read_password = node['influxdb']['users']['interal_metrics']['password']
       expect(chef_run).to create_influxdb_user(user_internal_read_username).with(
-        databases: '_internal',
-        permissions: 'READ'
+        databases: ['_internal'],
+        password: user_internal_read_password,
+        permissions: ['READ']
       )
     end
   end
