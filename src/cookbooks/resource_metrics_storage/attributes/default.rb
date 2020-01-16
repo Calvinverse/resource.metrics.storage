@@ -45,6 +45,12 @@ default['influxdb']['port']['collectd'] = 25_826
 default['influxdb']['port']['graphite'] = 2003
 default['influxdb']['port']['http'] = 8086
 
+# Note: the admin user needs to be set so that future users can
+# further configure Influx. This
+# password should be changed when the machine is provisioned!!!!!!
+default['influxdb']['users']['admin']['username'] = 'admin'
+default['influxdb']['users']['admin']['password'] = 'admin-password'
+
 default['influxdb']['users']['interal_metrics']['username'] = 'user.internal.read'
 default['influxdb']['users']['interal_metrics']['password'] = SecureRandom.uuid
 

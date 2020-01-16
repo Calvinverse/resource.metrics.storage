@@ -3,15 +3,11 @@
 require 'spec_helper'
 
 describe 'resource_metrics_storage::influxdb' do
-  context 'installs InfluxDB' do
+  context 'configures directories' do
     let(:chef_run) { ChefSpec::SoloRunner.converge(described_recipe) }
 
     it 'creates and mounts the data file system at /srv/influxdb' do
       expect(chef_run).to create_directory('/srv/influxdb')
-    end
-
-    it 'installs the InfluxDB service' do
-      expect(chef_run).to include_recipe('influxdb::default')
     end
 
     it 'creates and mounts the data file system at /srv/influxdb/data' do
@@ -344,6 +340,22 @@ describe 'resource_metrics_storage::influxdb' do
           mode: '750',
           owner: 'influxdb'
         )
+    end
+  end
+
+  context 'installs influxdb' do
+    let(:chef_run) { ChefSpec::SoloRunner.converge(described_recipe) }
+
+    it 'installs the service' do
+      expect(chef_run).to install_influxdb_install('influxdb')
+    end
+
+    it 'starts the service' do
+      expect(chef_run).to nothing_service('influxdb')
+    end
+
+    it 'configures influxdb' do
+      expect(chef_run).to create_influxdb_config('/etc/influxdb/influxdb.conf')
     end
   end
 
