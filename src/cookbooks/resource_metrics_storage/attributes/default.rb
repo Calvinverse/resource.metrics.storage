@@ -27,7 +27,7 @@ default['firewall']['ipv6_enabled'] = false
 # INFLUXDB
 #
 
-default['influxdb']['version'] = '1.7.2-1'
+default['influxdb']['version'] = '1.7.10-1'
 
 default['influxdb']['lib_file_path'] = '/srv/influxdb'
 default['influxdb']['meta_file_path'] = "#{node['influxdb']['lib_file_path']}/meta"
@@ -44,7 +44,15 @@ default['influxdb']['port']['backup'] = 8088
 default['influxdb']['port']['collectd'] = 25_826
 default['influxdb']['port']['graphite'] = 2003
 default['influxdb']['port']['http'] = 8086
-default['influxdb']['port']['opentsdb'] = 4242
+
+# Note: the admin user needs to be set so that future users can
+# further configure Influx. This
+# password should be changed when the machine is provisioned!!!!!!
+default['influxdb']['users']['admin']['username'] = 'admin'
+default['influxdb']['users']['admin']['password'] = 'admin-password'
+
+default['influxdb']['users']['interal_metrics']['username'] = 'user.internal.read'
+default['influxdb']['users']['interal_metrics']['password'] = SecureRandom.uuid
 
 # For influxdb versions >= 1.0.x
 # ref: https://docs.influxdata.com/influxdb/v1.0/administration/config/
@@ -101,7 +109,7 @@ default['influxdb']['config'] = {
   'http' => {
     'enabled' => true,
     'bind-address' => ":#{node['influxdb']['port']['http']}",
-    'auth-enabled' => false,
+    'auth-enabled' => true,
     'log-enabled' => true,
     'write-tracing' => false,
     'pprof-enabled' => false,
@@ -136,13 +144,6 @@ default['influxdb']['config'] = {
       'bind-address' => ":#{node['influxdb']['port']['collectd']}",
       'database' => 'collectd',
       'typesdb' => node['influxdb']['collectd_types_path']
-    }
-  ],
-  'opentsdb' => [
-    {
-      'enabled' => true,
-      'bind-address' => ":#{node['influxdb']['port']['opentsdb']}",
-      'database' => 'opentsdb'
     }
   ],
   'udp' => [

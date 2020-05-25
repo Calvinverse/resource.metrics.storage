@@ -11,8 +11,8 @@ maintainer_email '${EmailDocumentation}'
 source_url '${ProductUrl}' if respond_to?(:source_url)
 version '${VersionSemantic}'
 
-supports 'ubuntu', '>= 16.04'
+supports 'ubuntu', '>= 18.04'
 
-depends 'firewall', '= 2.6.2'
-depends 'influxdb', '= 6.2.0'
+depends 'firewall', '= 2.7.0'
+depends 'influxdb', '= 6.3.1'
 depends 'systemd', '= 3.2.3'

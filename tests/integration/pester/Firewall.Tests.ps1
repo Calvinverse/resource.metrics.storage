@@ -5,7 +5,7 @@ Describe 'The firewall' {
         It 'should return a status' {
             $ufwOutput | Should Not Be $null
             $ufwOutput.GetType().FullName | Should Be 'System.Object[]'
-            $ufwOutput.Length | Should Be 39
+            $ufwOutput.Length | Should Be 37
         }
 
         It 'should be enabled' {
@@ -52,10 +52,6 @@ Describe 'The firewall' {
     Context 'should allow influxdb' {
         It 'on port 2003'{
             ($ufwOutput | Where-Object {$_ -match '(2003/tcp)\s*(ALLOW)\s*(Anywhere)'} ) | Should Not Be $null
-        }
-
-        It 'on port 4242'{
-            ($ufwOutput | Where-Object {$_ -match '(4242/tcp)\s*(ALLOW)\s*(Anywhere)'} ) | Should Not Be $null
         }
 
         It 'on port 8083' {
