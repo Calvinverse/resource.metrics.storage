@@ -3,15 +3,11 @@
 require 'spec_helper'
 
 describe 'resource_metrics_storage::influxdb' do
-  context 'installs InfluxDB' do
+  context 'configures directories' do
     let(:chef_run) { ChefSpec::SoloRunner.converge(described_recipe) }
 
     it 'creates and mounts the data file system at /srv/influxdb' do
       expect(chef_run).to create_directory('/srv/influxdb')
-    end
-
-    it 'installs the InfluxDB service' do
-      expect(chef_run).to include_recipe('influxdb::default')
     end
 
     it 'creates and mounts the data file system at /srv/influxdb/data' do
@@ -347,6 +343,22 @@ describe 'resource_metrics_storage::influxdb' do
     end
   end
 
+  context 'installs influxdb' do
+    let(:chef_run) { ChefSpec::SoloRunner.converge(described_recipe) }
+
+    it 'installs the service' do
+      expect(chef_run).to install_influxdb_install('influxdb')
+    end
+
+    it 'starts the service' do
+      expect(chef_run).to nothing_service('influxdb')
+    end
+
+    it 'configures influxdb' do
+      expect(chef_run).to create_influxdb_config('/etc/influxdb/influxdb.conf')
+    end
+  end
+
   context 'creates the databases and sets retention policies' do
     let(:chef_run) { ChefSpec::SoloRunner.converge(described_recipe) }
 
@@ -385,8 +397,9 @@ describe 'resource_metrics_storage::influxdb' do
       user_internal_read_username = node['influxdb']['users']['interal_metrics']['username']
       user_internal_read_password = node['influxdb']['users']['interal_metrics']['password']
       expect(chef_run).to create_influxdb_user(user_internal_read_username).with(
-        databases: '_internal',
-        permissions: 'READ'
+        databases: ['_internal'],
+        password: user_internal_read_password,
+        permissions: ['READ']
       )
     end
   end

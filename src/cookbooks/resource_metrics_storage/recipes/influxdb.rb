@@ -70,7 +70,32 @@ end
 # INSTALL INFLUXDB
 #
 
-include_recipe 'influxdb::default'
+chef_gem 'toml' do
+  compile_time false if respond_to?(:compile_time)
+end
+
+chef_gem 'influxdb' do
+  version '0.6.1'
+  compile_time false if respond_to?(:compile_time)
+end
+
+influxdb_install 'influxdb' do
+  action [:install]
+  include_repository node['influxdb']['include_repository']
+  install_type node['influxdb']['install_type']
+  install_version node['influxdb']['version']
+end
+
+# should really wait for influx to become available
+service 'influxdb' do
+  action :nothing
+  supports status: true
+end
+
+influxdb_config node['influxdb']['config_file_path'] do
+  config node['influxdb']['config']
+  notifies :restart, 'service[influxdb]', :immediate
+end
 
 #
 # SET PERMISSIONS ON DATA PATH
@@ -411,33 +436,51 @@ file influx_collectd_types_path do
 end
 
 #
+# CREATE THE ADMIN USER
+#
+
+# Do that here so that chef can interact with Influx
+influxdb_admin node['influxdb']['users']['admin']['username'] do
+  action :create
+  password node['influxdb']['users']['admin']['password']
+end
+
+#
 # CREATE THE DATABASES
 #
 
 influxdb_database 'system' do
   action :create
+  auth_username node['influxdb']['users']['admin']['username']
+  auth_password node['influxdb']['users']['admin']['password']
 end
 
 influxdb_retention_policy 'retention.system' do
-  policy_name 'retention.system'
+  action :create
+  auth_username node['influxdb']['users']['admin']['username']
+  auth_password node['influxdb']['users']['admin']['password']
   database 'system'
   default true
   duration '2w'
+  policy_name 'retention.system'
   replication 1
-  action :create
 end
 
 influxdb_database 'services' do
   action :create
+  auth_username node['influxdb']['users']['admin']['username']
+  auth_password node['influxdb']['users']['admin']['password']
 end
 
 influxdb_retention_policy 'retention.services' do
-  policy_name 'retention.services'
+  action :create
+  auth_username node['influxdb']['users']['admin']['username']
+  auth_password node['influxdb']['users']['admin']['password']
   database 'services'
   default true
   duration '26w'
+  policy_name 'retention.services'
   replication 1
-  action :create
 end
 
 #
@@ -446,6 +489,8 @@ end
 
 influxdb_user node['influxdb']['users']['interal_metrics']['username'] do
   action :create
+  auth_username node['influxdb']['users']['admin']['username']
+  auth_password node['influxdb']['users']['admin']['password']
   databases ['_internal']
   password node['influxdb']['users']['interal_metrics']['password']
   permissions ['READ']
