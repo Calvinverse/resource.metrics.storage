@@ -58,26 +58,32 @@
             ],
             "type": "shell"
         },
+
         {
             "expect_disconnect": false,
             "inline": [
+                "echo \" LIST BLOCK DEVICES ...\"",
                 "sudo lsblk -o NAME,FSTYPE,SIZE,MOUNTPOINT,LABEL",
-                "sudo fdisk -l",
-                "sudo blkid -s UUID -o value /dev/sda"
+                "echo \" LIST DRIVES ...\"",
+                "sudo fdisk -l"
             ],
             "type": "shell"
         },
         {
             "expect_disconnect": false,
             "inline": [
-                "sudo rescan-scsi-bus.sh --remove --issue-lip",
-                "sudo mkdir -p /srv/influxdb",
-                "sudo mkfs.ext4 /dev/sdb",
-                "echo \"UUID=$(sudo blkid -s UUID -o value /dev/sdb) /srv/influxdb ext4 defaults 0 0 \" | sudo tee -a /etc/fstab"
+                "sudo mkdir -p /srv/influxdb"
             ],
             "pause_before": "15s",
             "type": "shell"
         },
+        {
+            "execute_command": "echo 'packer' | sudo -S bash -c '{{ .Vars }} {{ .Path }}'",
+            "expect_disconnect": false,
+            "script": "build/format_drives.sh",
+            "type": "shell"
+        },
+
         {
             "expect_disconnect": true,
             "inline": [
@@ -85,6 +91,7 @@
             ],
             "type": "shell"
         },
+
         {
             "expect_disconnect": false,
             "inline": [
@@ -96,17 +103,20 @@
         {
             "expect_disconnect": false,
             "inline": [
+                "echo \" LIST BLOCK DEVICES ...\"",
                 "sudo lsblk -o NAME,FSTYPE,SIZE,MOUNTPOINT,LABEL",
-                "sudo fdisk -l",
-                "sudo blkid -s UUID -o value /dev/sda"
+
+                "echo \" LIST DRIVES ...\"",
+                "sudo fdisk -l"
             ],
             "type": "shell"
         },
+
         {
             "cookbook_paths": [
                 "{{ user `dir_cookbooks_vendors` }}"
             ],
-            "execute_command": "sudo chef-solo --no-color -c {{.ConfigPath}} -j {{.JsonPath}} --chef-license accept-no-persist",
+            "execute_command": "sudo chef-solo --no-color -c {{.ConfigPath}} -j {{.JsonPath}} --chef-license accept-no-persist --log_level trace",
             "guest_os_type": "unix",
             "install_command": "echo \"Do nothing because chef should already be installed\"",
             "run_list": [
